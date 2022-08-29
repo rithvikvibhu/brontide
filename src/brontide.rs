@@ -1,11 +1,13 @@
 use crate::acts::{ActOne, ActThree, ActTwo};
 use crate::cipher_state::CipherState;
-use crate::common::{PROLOGUE, TAG_SIZE, VERSION};
+use crate::common::{PROLOGUE, TAG_SIZE, VERSION, ACT_ONE_SIZE, ACT_TWO_SIZE, ACT_THREE_SIZE};
 use crate::error::Error;
 use crate::handshake::HandshakeState;
 use crate::types::{ActState, PacketSize, PublicKey, SecretKey, Tag};
 use crate::util::{ecdh, expand, get_public_key};
 use crate::Result;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::Hash;
 
 use secp256k1;
 
@@ -76,7 +78,7 @@ impl Brontide {
             .symmetric
             .encrypt_hash(&[], &mut cipher_text)?;
 
-        let act_one = ActOne::new(VERSION, ephemeral, tag);
+        let act_one = ActOne::new(ephemeral, tag);
 
         //Set internal state to act one.
         self.state = ActState::One;
@@ -84,12 +86,12 @@ impl Brontide {
         Ok(act_one)
     }
 
-    pub fn recv_act_one(&mut self, act_one_bytes: [u8; 50]) -> Result<()> {
+    pub fn recv_act_one(&mut self, act_one_bytes: [u8; ACT_ONE_SIZE]) -> Result<()> {
         let act_one = ActOne::from(act_one_bytes);
 
-        if act_one.version() != VERSION {
-            return Err(Error::ActOneBadVersion);
-        }
+        // if act_one.version() != VERSION {
+        //     return Err(Error::ActOneBadVersion);
+        // }
 
         let e = act_one.key();
         let p = act_one.tag();
@@ -149,7 +151,7 @@ impl Brontide {
             .symmetric
             .encrypt_hash(&[], &mut cipher_text)?;
 
-        let act_two = ActTwo::new(VERSION, ephemeral, tag);
+        let act_two = ActTwo::new(ephemeral, tag);
 
         //Set internal state to act two.
         self.state = ActState::Two;
@@ -157,12 +159,12 @@ impl Brontide {
         Ok(act_two)
     }
 
-    pub fn recv_act_two(&mut self, act_two_bytes: [u8; 50]) -> Result<()> {
+    pub fn recv_act_two(&mut self, act_two_bytes: [u8; ACT_TWO_SIZE]) -> Result<()> {
         let act_two = ActTwo::from(act_two_bytes);
 
-        if act_two.version() != VERSION {
-            return Err(Error::ActTwoBadVersion);
-        }
+        // if act_two.version() != VERSION {
+        //     return Err(Error::ActTwoBadVersion);
+        // }
 
         let e = act_two.key();
         let p = act_two.tag();
@@ -235,12 +237,12 @@ impl Brontide {
         Ok(act_three)
     }
 
-    pub fn recv_act_three(&mut self, act_three_bytes: [u8; 66]) -> Result<()> {
+    pub fn recv_act_three(&mut self, act_three_bytes: [u8; ACT_THREE_SIZE]) -> Result<()> {
         let act_three = ActThree::from(act_three_bytes);
 
-        if act_three.version() != VERSION {
-            return Err(Error::ActThreeBadVersion);
-        }
+        // if act_three.version() != VERSION {
+        //     return Err(Error::ActThreeBadVersion);
+        // }
 
         let s1 = act_three.key();
         let p1 = act_three.tag();

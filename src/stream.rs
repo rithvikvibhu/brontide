@@ -1,5 +1,5 @@
 use crate::brontide::Brontide;
-use crate::common::HEADER_SIZE;
+use crate::common::{ACT_ONE_SIZE, ACT_THREE_SIZE, ACT_TWO_SIZE, HEADER_SIZE};
 use crate::error::Error;
 use crate::types::{ActState, Tag};
 use crate::Result;
@@ -34,7 +34,7 @@ impl BrontideStream {
         //These double ?? can be removed when timeout is stable on stream in async-std
         timeout(Duration::from_secs(1), bstream.stream.write_all(&act_one)).await??;
 
-        let mut act_two = [0_u8; 50];
+        let mut act_two = [0_u8; ACT_TWO_SIZE];
         timeout(
             Duration::from_secs(1),
             bstream.stream.read_exact(&mut act_two),
@@ -50,7 +50,7 @@ impl BrontideStream {
 
     pub async fn accept(stream: TcpStream, brontide: Brontide) -> Result<BrontideStream> {
         let mut bstream = BrontideStream::new(stream, brontide);
-        let mut act_one = [0_u8; 50];
+        let mut act_one = [0_u8; ACT_ONE_SIZE];
         timeout(
             Duration::from_secs(1),
             bstream.stream.read_exact(&mut act_one),
@@ -61,7 +61,7 @@ impl BrontideStream {
         let act_two = bstream.brontide.gen_act_two()?;
         timeout(Duration::from_secs(1), bstream.stream.write_all(&act_two)).await??;
 
-        let mut act_three = [0_u8; 66];
+        let mut act_three = [0_u8; ACT_THREE_SIZE];
         timeout(
             Duration::from_secs(1),
             bstream.stream.read_exact(&mut act_three),

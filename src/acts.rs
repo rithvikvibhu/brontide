@@ -23,30 +23,30 @@ impl Default for ActOne {
 //Need to string for this.
 
 impl ActOne {
-    pub fn new(version: u8, key: PublicKey, tag: Tag) -> Self {
+    pub fn new(key: PublicKey, tag: Tag) -> Self {
         let mut inner = [0_u8; ACT_ONE_SIZE];
 
-        inner[0] = version;
-        inner[1..34].copy_from_slice(&key);
-        inner[34..].copy_from_slice(&tag);
+        // inner[0] = version;
+        inner[0..64].copy_from_slice(&key);
+        inner[64..].copy_from_slice(&tag);
 
         ActOne(inner)
     }
 
-    pub fn version(&self) -> u8 {
-        self.0[0]
-    }
+    // pub fn version(&self) -> u8 {
+    //     self.0[0]
+    // }
 
     pub fn key(&self) -> PublicKey {
-        let mut inner = [0; 33];
-        inner.copy_from_slice(&self.0[1..34]);
-
-        PublicKey::from(inner)
+        let mut inner = [0; 64];
+        inner.copy_from_slice(&self.0[0..64]);
+        // TODO: elligator: hash (64) to public key (33)
+        PublicKey::empty()
     }
 
     pub fn tag(&self) -> Tag {
         let mut inner = [0; 16];
-        inner.copy_from_slice(&self.0[34..]);
+        inner.copy_from_slice(&self.0[64..]);
 
         Tag::from(inner)
     }
